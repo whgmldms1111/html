@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+<style>
+    h1{
+        text-align: center;
+    }
+    .disp{
+        box-sizing: border-box;
+        width: 100%;
+        height: 40px;
+        margin-bottom: 3px;
+    }
+    .disp#disp1{
+        font-family: "oxanium", sans-serif;
+        font-size: 22px;
+        text-align: center;
+    }
+    input[type="button"]{
+        width: 50px;
+        height: 50px;
+        text-align: center;
+        vertical-align: middle;
+        margin: 5px 0;
+    }
+    
+    #calc{
+        width: 220px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+    crossorigin="anonymous"></script>
+<script>
+    $(document).ready(function(){
+        let operator = '';
+        let calculated = false;
+
+        $('.num').click(function(){
+            let cur = $('#disp2').val();
+            let n = $(this).val();
+            // 결과를 표시한 뒤 숫자를 누르면 새 계산을 시작한다.
+            if(calculated){
+                cur = '';
+                $('#disp1').val('');
+                calculated = false;
+            }
+            $('#disp2').val(cur + n);
+        });
+        $('.op').click(function(){
+            let cur = $('#disp2').val();
+            let opt = $(this).val();
+            if(opt == "C"){
+                $('#disp1').val('');
+                $('#disp2').val('');
+                operator = '';
+                calculated = false;
+            }
+            else if(opt != "="){
+                if(cur === '') return;
+                // 두 번째 숫자를 입력하기 전에는 연산자를 바꿀 수 있다.
+                // 두 번째 숫자까지 입력했다면 추가 연산자는 받지 않는다.
+                if(operator !== ''){
+                    if(!cur.endsWith(operator)) return;
+                    cur = cur.slice(0, -1);
+                }
+                operator = opt;
+                calculated = false;
+                $('#disp2').val(cur + opt);
+            }
+            else{
+                if(cur === '' || operator === '') return;
+
+                // 음수인 이전 계산 결과의 부호는 따로 보관한다.
+                let negative = cur.startsWith('-');
+                let expression = negative ? cur.slice(1) : cur;
+
+                // 연산자를 구분자로 사용해 두 피연산자 문자열로 나눈다.
+                let operands = expression.split(operator);
+                if(operands.length !== 2 || operands[0] === '' || operands[1] === ''){
+                    $('#disp1').val('두 숫자를 입력하세요');
+                    return;
+                }
+
+                // 문자열을 숫자로 변환한다.
+                let left = Number(operands[0]);
+                let right = Number(operands[1]);
+                if(negative) left = -left;
+                let result;
+
+                switch(operator){
+                    case '+': result = left + right; break;
+                    case '-': result = left - right; break;
+                    case '*': result = left * right; break;
+                    case '/':
+                        if(right === 0){
+                            $('#disp1').val('0으로 나눌 수 없습니다');
+                            return;
+                        }
+                        result = left / right;
+                        break;
+                }
+
+                if(!Number.isFinite(result)){
+                    $('#disp1').val('계산식 오류');
+                    return;
+                }
+                $('#disp1').val(cur + ' =');
+                $('#disp2').val(result);
+                operator = '';
+                calculated = true;
+            }
+        });
+    });
+</script>
+</head>
+<body>
+    <h1>계산기</h1>
+    <div id="calc">
+        <div>
+            <input type="text" class="disp" id="disp1" readonly>
+            <input type="text" class="disp" id="disp2" readonly>
+        </div>
+        <input type="button" class="num" value="7">
+        <input type="button" class="num" value="8">
+        <input type="button" class="num" value="9">
+        <input type="button" class="op" value="+"><br>
+        <input type="button" class="num" value="4">
+        <input type="button" class="num" value="5">
+        <input type="button" class="num" value="6">
+        <input type="button" class="op" value="-"><br>
+        <input type="button" class="num" value="1">
+        <input type="button" class="num" value="2">
+        <input type="button" class="num" value="3">
+        <input type="button" class="op" value="*"><br>
+        <input type="button" class="op" value="C">
+        <input type="button" class="num" value="0">
+        <input type="button" class="op" value="=">
+        <input type="button" class="op" value="/"><br>
+    </div>
+</body>
+</html>

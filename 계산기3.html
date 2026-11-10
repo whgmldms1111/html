@@ -1,0 +1,540 @@
+아래 코드를 Visual Studio에서 `calculator.html`로 저장한 뒤 브라우저로 열면 됩니다. 사칙연산, 거듭제곱, 제곱근, 삼각함수, 로그, 팩토리얼을 사용할 수 있고, JavaScript에 `//` 주석으로 설명을 넣었습니다.
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>공학용 계산기</title>
+
+  <style>
+    /* HTML과 CSS에서는 // 대신 이런 모양의 주석을 사용합니다. */
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      background: #edf1f7;
+      font-family: Arial, sans-serif;
+    }
+
+    /* 계산기 전체 모양 */
+    .calculator {
+      width: 100%;
+      max-width: 430px;
+      padding: 24px;
+      border-radius: 20px;
+      background: #202938;
+      box-shadow: 0 15px 35px #0003;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      color: white;
+      font-size: 24px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #cbd5e1;
+      font-size: 14px;
+    }
+
+    /* 수식을 입력하고 결과를 확인하는 화면 */
+    #display {
+      width: 100%;
+      padding: 18px 12px;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      background: #101827;
+      color: white;
+      text-align: right;
+      font-size: 25px;
+    }
+
+    #display:focus {
+      outline: none;
+      border-color: #60a5fa;
+    }
+
+    #message {
+      min-height: 22px;
+      margin: 10px 0;
+      color: #fbbf24;
+      font-size: 13px;
+    }
+
+    /* 버튼을 가로 5칸으로 배치 */
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    button {
+      min-height: 48px;
+      border: none;
+      border-radius: 10px;
+      background: #374151;
+      color: white;
+      font-size: 17px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      filter: brightness(1.2);
+    }
+
+    button:active {
+      transform: scale(0.96);
+    }
+
+    button:focus-visible {
+      outline: 3px solid #93c5fd;
+      outline-offset: 2px;
+    }
+
+    .function {
+      background: #465575;
+    }
+
+    .operator {
+      background: #2563eb;
+    }
+
+    .clear {
+      background: #b93848;
+    }
+
+    .equals {
+      background: #13865e;
+    }
+
+    .help {
+      margin: 16px 0 0;
+      color: #cbd5e1;
+      font-size: 12px;
+      line-height: 1.7;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="calculator">
+    <h1>공학용 계산기</h1>
+
+    <label for="display">수식 입력</label>
+    <input
+      id="display"
+      type="text"
+      placeholder="예: sin(30) + 2^3"
+      autocomplete="off"
+      spellcheck="false"
+    >
+
+    <div id="message" role="status" aria-live="polite"></div>
+
+    <div class="buttons">
+      <button type="button" id="mode" class="function">DEG</button>
+      <button type="button" class="clear" data-action="clear">AC</button>
+      <button type="button" data-action="delete" aria-label="한 글자 지우기">⌫</button>
+      <button type="button" data-value="(">(</button>
+      <button type="button" data-value=")">)</button>
+
+      <button type="button" class="function" data-value="sin(">sin</button>
+      <button type="button" class="function" data-value="cos(">cos</button>
+      <button type="button" class="function" data-value="tan(">tan</button>
+      <button type="button" class="function" data-value="sqrt(">√</button>
+      <button type="button" class="operator" data-value="^">xʸ</button>
+
+      <button type="button" class="function" data-value="log(">log</button>
+      <button type="button" class="function" data-value="ln(">ln</button>
+      <button type="button" class="function" data-value="pi">π</button>
+      <button type="button" class="function" data-value="e">e</button>
+      <button type="button" class="operator" data-value="/">÷</button>
+
+      <button type="button" data-value="7">7</button>
+      <button type="button" data-value="8">8</button>
+      <button type="button" data-value="9">9</button>
+      <button type="button" class="function" data-value="!">n!</button>
+      <button type="button" class="operator" data-value="*">×</button>
+
+      <button type="button" data-value="4">4</button>
+      <button type="button" data-value="5">5</button>
+      <button type="button" data-value="6">6</button>
+      <button type="button" class="function" data-value="^2">x²</button>
+      <button type="button" class="operator" data-value="-">−</button>
+
+      <button type="button" data-value="1">1</button>
+      <button type="button" data-value="2">2</button>
+      <button type="button" data-value="3">3</button>
+      <button type="button" class="function" data-value="%">%</button>
+      <button type="button" class="operator" data-value="+">+</button>
+
+      <button type="button" data-value="0">0</button>
+      <button type="button" data-value=".">.</button>
+      <button type="button" class="function" data-value="abs(">abs</button>
+      <button type="button" class="function" data-value="ans">Ans</button>
+      <button type="button" class="equals" data-action="calculate">=</button>
+    </div>
+
+    <p class="help">
+      DEG: 각도 / RAD: 라디안 · 버튼을 눌러 전환<br>
+      log: 밑이 10인 로그 / ln: 자연로그 / abs: 절댓값<br>
+      %: 100으로 나누기 / Ans: 직전 계산 결과<br>
+      곱셈 기호는 직접 입력하세요. 예: 2*pi, 3*(2+1)<br>
+      Enter: 계산 / Esc: 전체 지우기
+    </p>
+  </main>
+
+  <script>
+    // HTML에서 필요한 요소를 가져옵니다.
+    const display = document.getElementById("display");
+    const message = document.getElementById("message");
+    const modeButton = document.getElementById("mode");
+
+    // 기본 각도 단위는 DEG이며, 마지막 계산 결과는 0으로 시작합니다.
+    let isDegree = true;
+    let lastAnswer = 0;
+
+    // 현재 커서 위치 또는 선택한 부분에 버튼의 값을 입력합니다.
+    function insertValue(value) {
+      const start = display.selectionStart;
+      const end = display.selectionEnd;
+
+      display.setRangeText(value, start, end, "end");
+      display.focus();
+      message.textContent = "";
+    }
+
+    // 전체 수식을 지웁니다.
+    function clearDisplay() {
+      display.value = "";
+      message.textContent = "";
+      display.focus();
+    }
+
+    // 선택한 부분이 있으면 지우고, 없으면 커서 앞의 한 글자를 지웁니다.
+    function deleteValue() {
+      const start = display.selectionStart;
+      const end = display.selectionEnd;
+
+      if (start !== end) {
+        display.setRangeText("", start, end, "end");
+      } else if (start > 0) {
+        display.setRangeText("", start - 1, start, "end");
+      }
+
+      display.focus();
+      message.textContent = "";
+    }
+
+    // 각도 단위를 DEG와 RAD 사이에서 전환합니다.
+    modeButton.addEventListener("click", () => {
+      isDegree = !isDegree;
+      modeButton.textContent = isDegree ? "DEG" : "RAD";
+      message.textContent = isDegree
+        ? "삼각함수에 도 단위를 사용합니다."
+        : "삼각함수에 라디안을 사용합니다.";
+    });
+
+    // 숫자나 함수 버튼을 누르면 해당 값을 입력합니다.
+    document.querySelectorAll("[data-value]").forEach(button => {
+      button.addEventListener("click", () => {
+        insertValue(button.dataset.value);
+      });
+    });
+
+    // AC, 지우기, 계산 버튼의 동작을 연결합니다.
+    document.querySelectorAll("[data-action]").forEach(button => {
+      button.addEventListener("click", () => {
+        const action = button.dataset.action;
+
+        if (action === "clear") clearDisplay();
+        if (action === "delete") deleteValue();
+        if (action === "calculate") calculate();
+      });
+    });
+
+    // 키보드로 수식을 입력한 경우에도 안내 문구를 지웁니다.
+    display.addEventListener("input", () => {
+      message.textContent = "";
+    });
+
+    // 입력창에서 Enter는 계산, Esc는 전체 지우기로 동작합니다.
+    display.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === "=") {
+        event.preventDefault();
+        calculate();
+      }
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        clearDisplay();
+      }
+    });
+
+    // 팩토리얼: 예를 들어 5!은 5 × 4 × 3 × 2 × 1입니다.
+    function factorial(number) {
+      if (!Number.isInteger(number) || number < 0 || number > 170) {
+        throw new Error("팩토리얼은 0~170 사이의 정수만 가능합니다.");
+      }
+
+      let result = 1;
+
+      for (let i = 2; i <= number; i++) {
+        result *= i;
+      }
+
+      return result;
+    }
+
+    // 수식을 숫자, 함수 이름, 연산자 단위로 나눕니다.
+    // 입력 내용을 JavaScript 코드로 실행하지 않고 직접 해석합니다.
+    function tokenize(expression) {
+      const tokens = [];
+      let position = 0;
+
+      while (position < expression.length) {
+        const remaining = expression.slice(position);
+
+        // 띄어쓰기는 계산에 영향을 주지 않으므로 건너뜁니다.
+        const space = remaining.match(/^\s+/);
+
+        if (space) {
+          position += space[0].length;
+          continue;
+        }
+
+        // 소수와 지수 표기 숫자를 인식합니다. 예: 3.14, 1e-7
+        const number = remaining.match(
+          /^(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?/i
+        );
+
+        if (number) {
+          tokens.push(Number(number[0]));
+          position += number[0].length;
+          continue;
+        }
+
+        // sin, sqrt, pi 같은 영문 이름을 인식합니다.
+        const name = remaining.match(/^[a-z]+/i);
+
+        if (name) {
+          tokens.push(name[0].toLowerCase());
+          position += name[0].length;
+          continue;
+        }
+
+        // 계산기에서 지원하는 연산자와 괄호를 인식합니다.
+        const character = expression[position];
+
+        if ("+-*/^!%()".includes(character)) {
+          tokens.push(character);
+          position++;
+          continue;
+        }
+
+        throw new Error(`사용할 수 없는 문자입니다: ${character}`);
+      }
+
+      return tokens;
+    }
+
+    // 함수 이름에 맞는 수학 계산을 수행합니다.
+    function applyFunction(name, value) {
+      const angle = isDegree ? value * Math.PI / 180 : value;
+
+      switch (name) {
+        case "sin":
+          return Math.sin(angle);
+
+        case "cos":
+          return Math.cos(angle);
+
+        case "tan":
+          // 90도처럼 탄젠트가 정의되지 않는 각도를 확인합니다.
+          if (Math.abs(Math.cos(angle)) < 1e-12) {
+            throw new Error("이 각도에서는 tan을 계산할 수 없습니다.");
+          }
+          return Math.tan(angle);
+
+        case "sqrt":
+          if (value < 0) {
+            throw new Error("제곱근에는 0 이상의 수를 입력하세요.");
+          }
+          return Math.sqrt(value);
+
+        case "log":
+        case "ln":
+          if (value <= 0) {
+            throw new Error("로그에는 0보다 큰 수를 입력하세요.");
+          }
+          return name === "log" ? Math.log10(value) : Math.log(value);
+
+        case "abs":
+          return Math.abs(value);
+
+        default:
+          throw new Error(`지원하지 않는 함수입니다: ${name}`);
+      }
+    }
+
+    // 연산 우선순위에 따라 수식을 해석합니다.
+    function evaluateExpression(expression) {
+      const tokens = tokenize(expression);
+      let index = 0;
+
+      // 현재 위치의 기호가 예상한 기호인지 확인하고 다음으로 이동합니다.
+      function expect(symbol) {
+        if (tokens[index] !== symbol) {
+          throw new Error(`'${symbol}' 기호를 확인하세요.`);
+        }
+        index++;
+      }
+
+      // 덧셈과 뺄셈을 계산합니다.
+      function parseExpression() {
+        let value = parseTerm();
+
+        while (tokens[index] === "+" || tokens[index] === "-") {
+          const operator = tokens[index++];
+          const right = parseTerm();
+          value = operator === "+" ? value + right : value - right;
+        }
+
+        return value;
+      }
+
+      // 곱셈과 나눗셈은 덧셈과 뺄셈보다 먼저 계산합니다.
+      function parseTerm() {
+        let value = parseUnary();
+
+        while (tokens[index] === "*" || tokens[index] === "/") {
+          const operator = tokens[index++];
+          const right = parseUnary();
+
+          if (operator === "/" && right === 0) {
+            throw new Error("0으로 나눌 수 없습니다.");
+          }
+
+          value = operator === "*" ? value * right : value / right;
+        }
+
+        return value;
+      }
+
+      // 숫자 앞의 +와 -를 처리합니다. 예: -5, -(2+3)
+      function parseUnary() {
+        if (tokens[index] === "+") {
+          index++;
+          return parseUnary();
+        }
+
+        if (tokens[index] === "-") {
+          index++;
+          return -parseUnary();
+        }
+
+        return parsePower();
+      }
+
+      // 거듭제곱을 계산합니다.
+      // 2^3^2는 일반적인 수학 규칙에 따라 2^(3^2)로 계산합니다.
+      function parsePower() {
+        const value = parsePostfix();
+
+        if (tokens[index] === "^") {
+          index++;
+          return Math.pow(value, parseUnary());
+        }
+
+        return value;
+      }
+
+      // 숫자 뒤에 붙는 팩토리얼과 퍼센트를 처리합니다.
+      function parsePostfix() {
+        let value = parsePrimary();
+
+        while (tokens[index] === "!" || tokens[index] === "%") {
+          const operator = tokens[index++];
+          value = operator === "!" ? factorial(value) : value / 100;
+        }
+
+        return value;
+      }
+
+      // 숫자, 괄호, 상수, 함수를 처리합니다.
+      function parsePrimary() {
+        const token = tokens[index++];
+
+        if (typeof token === "number") return token;
+
+        if (token === "(") {
+          const value = parseExpression();
+          expect(")");
+          return value;
+        }
+
+        if (token === "pi") return Math.PI;
+        if (token === "e") return Math.E;
+        if (token === "ans") return lastAnswer;
+
+        if (typeof token === "string" && /^[a-z]+$/.test(token)) {
+          expect("(");
+          const value = parseExpression();
+          expect(")");
+          return applyFunction(token, value);
+        }
+
+        throw new Error("숫자, 함수 또는 괄호를 확인하세요.");
+      }
+
+      const result = parseExpression();
+
+      // 해석하지 못한 입력이 남아 있다면 잘못된 수식입니다.
+      if (index !== tokens.length) {
+        throw new Error("수식을 확인하세요. 곱셈은 *로 입력해야 합니다.");
+      }
+
+      // 무한대나 실수 범위를 벗어난 결과를 확인합니다.
+      if (!Number.isFinite(result)) {
+        throw new Error("실수 범위에서 계산할 수 없거나 결과가 너무 큽니다.");
+      }
+
+      return result;
+    }
+
+    // = 버튼 또는 Enter를 눌렀을 때 실행합니다.
+    function calculate() {
+      const expression = display.value.trim();
+
+      if (!expression) return;
+
+      try {
+        const result = evaluateExpression(expression);
+
+        // Ans 버튼에서 사용할 수 있도록 원래 결과를 저장합니다.
+        lastAnswer = result;
+
+        // 화면에는 소수 계산 오차가 덜 보이도록 유효숫자를 정리합니다.
+        display.value = String(Number(result.toPrecision(14)));
+        message.textContent = "";
+      } catch (error) {
+        // 잘못된 수식은 그대로 두고 수정할 수 있도록 안내합니다.
+        message.textContent = error.message;
+      }
+    }
+  </script>
+</body>
+</html>
+```
